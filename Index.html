@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jumlah Tempat Peribadatan Kota Semarang (2020–2023)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --coral-light: #FCEDD8;
+      --coral-yellow: #FFD464;
+      --coral-pink: #FF5E5E;
+      --coral-red: #E23C64;
+      --coral-dark: #B0183D;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: linear-gradient(120deg, var(--coral-light), var(--coral-yellow), var(--coral-red));
+      background-size: 300% 300%;
+      animation: gradient 12s ease infinite;
+      color: #222;
+    }
+
+    @keyframes gradient {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 10px;
+      color: white;
+      font-size: 30px;
+      font-weight: 700;
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subheader {
+      text-align: center;
+      font-size: 16px;
+      color: #fff9;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1300px;
+      margin: auto;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 30px 30px 40px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    select {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: var(--coral-red);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    select:hover {
+      background: var(--coral-dark);
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: linear-gradient(135deg, var(--coral-yellow), var(--coral-red));
+      color: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      text-align: center;
+      flex: 1;
+      min-width: 200px;
+      margin: 10px;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 40px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th {
+      background: var(--coral-red);
+      color: white;
+      padding: 10px;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 8px;
+      border: 1px solid #eee;
+    }
+
+    tr:nth-child(even) { background-color: #FFF8F7; }
+    tr:hover { background-color: var(--coral-light); transition: 0.3s; }
+
+    .chart-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      text-align: center;
+      color: #333;
+      font-size: 14px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Jumlah Tempat Peribadatan Menurut Kecamatan di Kota Semarang Tahun 2020–2023</header>
+  <div class="subheader"></div>
+
+  <div class="container">
+
+    <!-- PILIH TAHUN -->
+    <div class="top-controls">
+      <h2 style="color: var(--coral-dark); margin:0;">Pilih Tahun</h2>
+      <select id="yearSelect" onchange="updateView()">
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023" selected>2023</option>
+      </select>
+    </div>
+
+    <!-- RINGKASAN TOTAL SEMUA TEMPAT IBADAH -->
+    <div class="summary" id="summaryCards"></div>
+
+    <!-- TABEL DATA -->
+    <div class="table-container">
+      <h3 style="text-align:center; color: var(--coral-dark); margin-bottom:10px;">
+        Tabel Jumlah Tempat Peribadatan per Kecamatan
+      </h3>
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Kecamatan</th>
+            <th>Masjid</th>
+            <th>Mushola</th>
+            <th>Gereja Protestan</th>
+            <th>Gereja Katolik</th>
+            <th>Pura</th>
+            <th>Vihara</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- GRAFIK -->
+    <div class="chart-container">
+      <h3 style="text-align:center; color: var(--coral-dark); margin-bottom:15px;">
+        Grafik Sebaran Tempat Peribadatan per Kecamatan
+      </h3>
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <footer>© 2025 - Statistik Peribadatan Kota Semarang | Sumber: BPS</footer>
+
+  <script>
+    const data = {
+      "Mijen": {2020:[76,143,12,1,2,1],2021:[82,145,10,1,0,0],2022:[83,149,10,3,2,0],2023:[83,150,16,4,1,0]},
+      "Gunung Pati":{2020:[121,243,6,0,0,1],2021:[129,249,7,0,0,3],2022:[138,256,7,0,0,3],2023:[142,257,9,0,0,3]},
+      "Banyumanik":{2020:[117,124,17,1,0,1],2021:[127,123,35,1,0,1],2022:[133,127,36,1,0,1],2023:[137,131,39,1,0,1]},
+      "Gajah Mungkur":{2020:[50,10,12,0,2,1],2021:[55,16,11,3,2,0],2022:[58,16,11,1,2,0],2023:[58,17,11,2,2,0]},
+      "Semarang Selatan":{2020:[51,39,11,2,3,1],2021:[64,40,15,3,0,1],2022:[64,42,18,4,0,1],2023:[65,41,20,3,0,1]},
+      "Candisari":{2020:[80,68,13,1,2,1],2021:[80,69,14,1,2,1],2022:[80,75,16,5,0,1],2023:[80,77,13,4,0,1]},
+      "Tembalang":{2020:[103,62,20,1,0,0],2021:[162,75,29,1,0,0],2022:[163,80,29,1,0,0],2023:[167,88,30,2,0,0]},
+      "Pedurungan":{2020:[198,138,25,0,1,1],2021:[206,141,26,5,1,1],2022:[210,146,26,5,1,1],2023:[212,146,29,5,1,1]},
+      "Genuk":{2020:[45,35,7,0,1,1],2021:[60,36,7,0,0,1],2022:[65,42,6,1,0,1],2023:[66,44,8,1,0,0]},
+      "Gayamsari":{2020:[55,67,16,0,0,1],2021:[62,66,9,0,0,1],2022:[64,68,9,1,0,0],2023:[64,69,9,1,0,0]},
+      "Semarang Timur":{2020:[45,31,18,0,0,2],2021:[49,31,26,0,0,3],2022:[49,32,29,1,0,3],2023:[53,32,28,1,0,5]},
+      "Semarang Utara":{2020:[82,115,24,1,0,8],2021:[91,116,22,4,0,9],2022:[92,116,23,3,0,9],2023:[92,116,23,3,0,4]},
+      "Semarang Tengah":{2020:[38,64,18,2,0,12],2021:[38,64,21,1,0,12],2022:[39,64,21,2,0,12],2023:[39,67,22,2,0,17]},
+      "Semarang Barat":{2020:[122,71,45,4,0,6],2021:[116,72,51,5,0,6],2022:[117,75,52,5,0,6],2023:[117,75,59,5,0,4]},
+      "Tugu":{2020:[16,50,1,0,0,0],2021:[16,50,1,0,0,0],2022:[16,51,1,0,0,0],2023:[16,52,1,0,0,0]},
+      "Ngaliyan":{2020:[109,44,15,1,0,0],2021:[150,45,14,1,2,0],2022:[151,48,16,1,1,0],2023:[150,50,16,1,1,0]}
+    };
+
+    const tbody = document.querySelector("#dataTable tbody");
+    const summaryCards = document.querySelector("#summaryCards");
+    let chart;
+
+    function updateView() {
+      const year = document.getElementById("yearSelect").value;
+      loadSummary(year);
+      loadTable(year);
+      updateChart(year);
+    }
+
+    function loadSummary(year) {
+      const totalAll = Object.values(data).reduce((sum, val) => sum + val[year].reduce((a,b)=>a+b,0), 0);
+      const masjid = Object.values(data).reduce((sum, val) => sum + val[year][0], 0);
+      const mushola = Object.values(data).reduce((sum, val) => sum + val[year][1], 0);
+      const gereja = Object.values(data).reduce((sum, val) => sum + val[year][2] + val[year][3], 0);
+      const lainnya = Object.values(data).reduce((sum, val) => sum + val[year][4] + val[year][5], 0);
+      summaryCards.innerHTML = `
+        <div class="card"><h2>${totalAll}</h2><p>Total Semua Tempat Ibadah</p></div>
+        <div class="card"><h2>${masjid + mushola}</h2><p>Masjid & Mushola</p></div>
+        <div class="card"><h2>${gereja}</h2><p>Gereja (Protestan & Katolik)</p></div>
+        <div class="card"><h2>${lainnya}</h2><p>Pura & Vihara</p></div>
+      `;
+    }
+
+    function loadTable(year) {
+      tbody.innerHTML = "";
+      for (const [kecamatan, tahun] of Object.entries(data)) {
+        const d = tahun[year];
+        tbody.innerHTML += `<tr>
+          <td>${kecamatan}</td>
+          <td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td><td>${d[3]}</td><td>${d[4]}</td><td>${d[5]}</td>
+        </tr>`;
+      }
+    }
+
+    function updateChart(year) {
+      const labels = Object.keys(data);
+      const totals = labels.map(k => data[k][year].reduce((a,b)=>a+b,0));
+      const ctx = document.getElementById("chart").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: `Total Tempat Ibadah Tahun ${year}`,
+            data: totals,
+            backgroundColor: 'rgba(226, 60, 100, 0.8)',
+            borderColor: '#B0183D',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Jumlah Tempat Ibadah' } },
+            x: { title: { display: true, text: 'Kecamatan' } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { mode: 'index', intersect: false }
+          }
+        }
+      });
+    }
+
+    updateView();
+  </script>
+
+</body>
+</html>
