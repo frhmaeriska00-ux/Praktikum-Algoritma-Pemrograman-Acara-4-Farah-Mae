@@ -4,8 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jumlah Tempat Peribadatan Kota Semarang (2020–2023)</title>
+
+  <!-- Library Chart.js untuk menampilkan grafik data tempat peribadatan di kecamatan Kota Semarang -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
+    /* ==========================
+       DEKLARASI WARNA UTAMA
+       ========================== */
     :root {
       --coral-light: #FCEDD8;
       --coral-yellow: #FFD464;
@@ -14,6 +20,9 @@
       --coral-dark: #B0183D;
     }
 
+    /* ==========================
+       TAMPILAN STYLE HALAMAN
+       ========================== */
     body {
       font-family: 'Poppins', sans-serif;
       margin: 0;
@@ -23,12 +32,16 @@
       color: #222;
     }
 
+    /* Animasi gradasi bergerak lembut */
     @keyframes gradient {
       0% {background-position: 0% 50%;}
       50% {background-position: 100% 50%;}
       100% {background-position: 0% 50%;}
     }
 
+    /* ==========================
+       BAGIAN HEADER
+       ========================== */
     header {
       text-align: center;
       padding: 40px 20px 10px;
@@ -38,6 +51,7 @@
       text-shadow: 1px 2px 4px rgba(0,0,0,0.3);
     }
 
+    /* Bagian subjudul di bawah header */
     .subheader {
       text-align: center;
       font-size: 16px;
@@ -45,6 +59,9 @@
       margin-bottom: 20px;
     }
 
+    /* ==========================
+       KOTAK UTAMA / CONTAINER
+       ========================== */
     .container {
       width: 90%;
       max-width: 1300px;
@@ -56,11 +73,15 @@
       animation: fadeIn 1s ease;
     }
 
+    /* Animasi muncul dari bawah */
     @keyframes fadeIn {
       from {opacity: 0; transform: translateY(20px);}
       to {opacity: 1; transform: translateY(0);}
     }
 
+    /* ==========================
+       BAGIAN KONTROL ATAS
+       ========================== */
     .top-controls {
       display: flex;
       justify-content: space-between;
@@ -69,6 +90,7 @@
       margin-bottom: 25px;
     }
 
+    /* Dropdown pilih tahun */
     select {
       padding: 10px 20px;
       border: none;
@@ -79,11 +101,11 @@
       cursor: pointer;
       transition: background 0.3s;
     }
+    select:hover { background: var(--coral-dark); }
 
-    select:hover {
-      background: var(--coral-dark);
-    }
-
+    /* ==========================
+       KARTU RINGKASAN TOTAL
+       ========================== */
     .summary {
       display: flex;
       justify-content: space-around;
@@ -103,11 +125,11 @@
       margin: 10px;
       transition: transform 0.3s;
     }
+    .card:hover { transform: scale(1.05); }
 
-    .card:hover {
-      transform: scale(1.05);
-    }
-
+    /* ==========================
+       TABEL DATA TEMPAT PERIBADATAN
+       ========================== */
     .table-container {
       overflow-x: auto;
       margin-bottom: 40px;
@@ -120,22 +142,22 @@
       border-radius: 10px;
       overflow: hidden;
     }
-
     th {
       background: var(--coral-red);
       color: white;
       padding: 10px;
       font-weight: 600;
     }
-
     td {
       padding: 8px;
       border: 1px solid #eee;
     }
-
     tr:nth-child(even) { background-color: #FFF8F7; }
     tr:hover { background-color: var(--coral-light); transition: 0.3s; }
 
+    /* ==========================
+       GRAFIK BAR
+       ========================== */
     .chart-container {
       background: #fff;
       border-radius: 12px;
@@ -143,6 +165,9 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
+    /* ==========================
+       FOOTER
+       ========================== */
     footer {
       text-align: center;
       color: #333;
@@ -152,14 +177,16 @@
     }
   </style>
 </head>
-<body>
 
+<body>
+  <!-- HEADER JUDUL -->
   <header>Jumlah Tempat Peribadatan Menurut Kecamatan di Kota Semarang Tahun 2020–2023</header>
   <div class="subheader"></div>
 
+  <!-- CONTAINER UTAMA -->
   <div class="container">
 
-    <!-- PILIH TAHUN -->
+    <!-- PILIHAN TAHUN -->
     <div class="top-controls">
       <h2 style="color: var(--coral-dark); margin:0;">Pilih Tahun</h2>
       <select id="yearSelect" onchange="updateView()">
@@ -170,7 +197,7 @@
       </select>
     </div>
 
-    <!-- RINGKASAN TOTAL SEMUA TEMPAT IBADAH -->
+    <!-- KARTU RINGKASAN TOTAL -->
     <div class="summary" id="summaryCards"></div>
 
     <!-- TABEL DATA -->
@@ -205,7 +232,11 @@
 
   <footer>© 2025 - Statistik Peribadatan Kota Semarang | Sumber: BPS</footer>
 
+  <!-- ==========================
+       SCRIPT JAVASCRIPT
+       ========================== -->
   <script>
+    // DATA: jumlah tempat ibadah per kecamatan dan tahun
     const data = {
       "Mijen": {2020:[76,143,12,1,2,1],2021:[82,145,10,1,0,0],2022:[83,149,10,3,2,0],2023:[83,150,16,4,1,0]},
       "Gunung Pati":{2020:[121,243,6,0,0,1],2021:[129,249,7,0,0,3],2022:[138,256,7,0,0,3],2023:[142,257,9,0,0,3]},
@@ -225,23 +256,32 @@
       "Ngaliyan":{2020:[109,44,15,1,0,0],2021:[150,45,14,1,2,0],2022:[151,48,16,1,1,0],2023:[150,50,16,1,1,0]}
     };
 
+    // Inisialisasi elemen-elemen penting
     const tbody = document.querySelector("#dataTable tbody");
     const summaryCards = document.querySelector("#summaryCards");
     let chart;
 
+    /* ==========================
+       FUNGSI UTAMA UNTUK UPDATE SEMUA TAMPILAN
+       ========================== */
     function updateView() {
       const year = document.getElementById("yearSelect").value;
-      loadSummary(year);
-      loadTable(year);
-      updateChart(year);
+      loadSummary(year);  // update kartu ringkasan
+      loadTable(year);    // update tabel
+      updateChart(year);  // update grafik
     }
 
+    /* ==========================
+       FUNGSI RINGKASAN TOTAL
+       ========================== */
     function loadSummary(year) {
       const totalAll = Object.values(data).reduce((sum, val) => sum + val[year].reduce((a,b)=>a+b,0), 0);
       const masjid = Object.values(data).reduce((sum, val) => sum + val[year][0], 0);
       const mushola = Object.values(data).reduce((sum, val) => sum + val[year][1], 0);
       const gereja = Object.values(data).reduce((sum, val) => sum + val[year][2] + val[year][3], 0);
       const lainnya = Object.values(data).reduce((sum, val) => sum + val[year][4] + val[year][5], 0);
+
+      // Isi ringkasan ke dalam kartu
       summaryCards.innerHTML = `
         <div class="card"><h2>${totalAll}</h2><p>Total Semua Tempat Ibadah</p></div>
         <div class="card"><h2>${masjid + mushola}</h2><p>Masjid & Mushola</p></div>
@@ -250,6 +290,9 @@
       `;
     }
 
+    /* ==========================
+       FUNGSI TABEL DATA
+       ========================== */
     function loadTable(year) {
       tbody.innerHTML = "";
       for (const [kecamatan, tahun] of Object.entries(data)) {
@@ -261,11 +304,18 @@
       }
     }
 
+    /* ==========================
+       FUNGSI GRAFIK BAR
+       ========================== */
     function updateChart(year) {
       const labels = Object.keys(data);
       const totals = labels.map(k => data[k][year].reduce((a,b)=>a+b,0));
       const ctx = document.getElementById("chart").getContext("2d");
+
+      // Hapus grafik lama jika sudah ada
       if (chart) chart.destroy();
+
+      // Buat grafik baru
       chart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -293,8 +343,8 @@
       });
     }
 
+    // Jalankan script untuk pertama kali
     updateView();
   </script>
-
 </body>
 </html>
